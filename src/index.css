@@ -8,6 +8,7 @@ body {
 /*   -moz-osx-font-smoothing: grayscale; */
   background: #12151c;
   color: #eee;
+  margin: 0;
 }
 
 .active {
@@ -27,8 +28,47 @@ code {
   display: inline;
 }
 .main {
-  display: flex;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: auto 30px;
   padding: 16px;
+  height: calc(100vh - 32px);
+}
+
+.list {
+  display: flex;
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 1;
+  grid-row-end: 2;
+  flex-direction: column;
+  max-height: 100%;
+  overflow: scroll;
+}
+
+.sidebar {
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 1;
+  grid-row-end: 2;
+  max-height: 100%;
+  overflow: scroll;
+}
+
+.command {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 2;
+  grid-row-end: 3;
+  padding: 4px;
+}
+
+.command>input{
+  background: #12151c;
+  color: white;
+  border: 0;
+  outline: 0;
+  width: 100%;
 }
 
 input {
@@ -41,13 +81,9 @@ input {
   border-right: 1px solid white;
 }
 
-.list {
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-}
 
-.line {
+.item {
+  margin: 2px;
 }
 
 .title-input {
@@ -56,8 +92,34 @@ input {
   display: inline;
   padding: 0;
   border: 0;
-  width: 300px;
+  width: 400px;
   background: #2B3245;
   color: white;
   outline: 0;
 }
+
+textarea {
+  background: #2B3245;
+  color: white;
+  border: 0;
+  outline: 0;
+}
+
+.tag {
+  margin-right: 4px;
+}
+
+a, a:visited {
+  color: white;
+}
+
+.inline-link {
+  font-size: 12px;
+  text-decoration: none;
+  margin: 2px;
+  opacity: 0.7;
+}
+
+.inline-link:hover {
+    opacity: 1;
+  }
