@@ -1,0 +1,63 @@
+body {
+  margin: 0;
+/*   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', */
+/*     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', */
+/*     sans-serif; */
+  font-family: "Courier New";
+/*   -webkit-font-smoothing: antialiased; */
+/*   -moz-osx-font-smoothing: grayscale; */
+  background: #12151c;
+  color: #eee;
+}
+
+.active {
+  background: #2B3245;
+}
+
+.checkbox {
+  display: inline;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.inline {
+  display: inline;
+}
+.main {
+  display: flex;
+  padding: 16px;
+}
+
+input {
+  font-family: monospace;
+  display: block;
+}
+
+.caret {
+  letter-spacing: 0;
+  border-right: 1px solid white;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+}
+
+.line {
+}
+
+.title-input {
+  font-family: "Courier New";
+  font-size: 16px;
+  display: inline;
+  padding: 0;
+  border: 0;
+  width: 300px;
+  background: #2B3245;
+  color: white;
+  outline: 0;
+}
