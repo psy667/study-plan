@@ -21,10 +21,16 @@ type Item = {
 
   depth: number;
   expanded: boolean;
+  children: Item[];
 };
+
+const generateId = (): string => {
+  return Math.random().toString(16).split('.')[1]
+}
 
 function Item(title, depth): Item {
   return {
+    id: generateId(),
     title,
     depth,
     done: false,
@@ -32,11 +38,141 @@ function Item(title, depth): Item {
     author: '',
     tags: [],
     description: '',
+    doneAt: null,
+
+    ///
     expanded: true,
+    children: []
   };
 }
 
-function calcChildren(list) { }
+function Log(taskId: number) {
+  return {
+    taskId: taskId,
+    
+  }
+}
+
+/*
+1
+  2
+  3
+  4
+    5
+    6
+  5
+*/
+
+const last = (arr) => {
+  return arr[arr.length - 1]
+}
+
+function migration(item) {
+  return {...Item("", 0), ...item}
+}
+
+function calcChildren(list) {
+  // let result = [Item("root", -1)]
+  // let curDepth = 0;
+  let prev = Item("root", -1);
+  let parent = [prev];
+  let result = []
+
+
+  list.map(it => JSON.parse(JSON.stringify(it))).forEach((it,idx) => {
+    
+    if(it.depth == prev.depth) {
+      last(parent).children.push(it)
+      prev = it
+    } else if(it.depth > prev.depth) {
+      parent.push(prev)
+      last(parent).children.push(it)
+      prev = it
+    } else if(it.depth < prev.depth) {
+      parent.pop()
+      last(parent).children.push(it)
+      prev = it
+    }
+    if(it.depth == 0) {
+      result.push(it)
+    }
+
+  })
+
+  console.log(result)
+  return result
+}
+
+function TreeNode({item, context}) {
+  const { state, setState, setTitle, handlePaste, cropString } = context;
+  
+  let inputRef;
+
+  createEffect(() => {
+    if(state.selectedItem == item.id) {
+      inputRef.focus()
+    }
+  });
+  
+  return (
+    <><div class="item">
+              <span>{'  '.repeat(item.depth)}</span>
+              <Show when={item.children.length} fallback={" "}>
+                <span>
+                  <Show when={!item.expanded} fallback={"-"}>+</Show>
+                </span>
+              </Show>
+              <span>
+                <input
+                  class="checkbox"
+                  type="checkbox"
+                  disabled
+                  checked={item.done}
+                  onChange={(e) =>
+                    setState('items', item.id, 'done', e.currentTarget.checked)
+                  }
+                />
+              </span>
+
+              <Show
+                when={state.selectedItem == item.id}
+                fallback={
+                  <span onClick={(e) => setState('selectedItem', item.id)}>
+                    {cropString(item.title, 50)}
+                    <Show
+                      when={item.link}
+                    >
+                      <a class="inline-link" href={item.link} target="_blank">↗️</a>
+                    </Show>
+                  </span>
+                }
+              >
+                <input
+                  ref={inputRef}
+                  class="title-input"
+                  onInput={(e) => setTitle(item.id, e.target.value)}
+                  onPaste={handlePaste}
+                  onClick={(e) => setState('selectedItem', item.id)}
+                  value={item.title}
+                />
+              </Show>
+
+              <Show when={item.children.length}>
+                <span>
+                  &nbsp;({item.children.length})
+                </span>
+              </Show>
+            </div>
+      <Show when={item.expanded}>
+      <For each={item.children}>
+          {(item2) => (
+            <TreeNode item={item2} context={context}></TreeNode>
+          )}
+        </For>
+        </Show>
+    </>
+  )
+}
 
 function App() {
   let inputRef;
@@ -47,29 +183,32 @@ function App() {
     prevState.push(JSON.stringify(state.items))
   })
 
+  const initItem = Item('First item', 0)
+
   const [state, setState] = createLocalStore('state', {
-    items: [Item('First item', 0)],
-    lineNumber: 0,
+    items: [initItem],
+    log: [],
+    selectedItem: initItem.id,
   });
+
+  state.items.forEach((it,idx) => {
+    setState("items", idx, migration(it))
+  })
+
 
   const [mode, setMode] = createSignal('view');
   const [consoleOutput, setConsoleOutput] = createSignal("")
 
-  const focusInput = () => {
-    if (!inputRef) return;
-    inputRef.focus();
-
-    setTimeout(() => {
-      inputRef.selectionStart = inputRef.selectionEnd = inputRef.value.length;
-    }, 0);
-  };
-
-  createEffect(() => {
-    focusInput();
-    state.lineNumber;
-  });
-
   const globalOnKeyDown = (e) => {
+    if (e.key == 'ArrowUp') {
+      setState('selectedItem', (it) => getPrevItemId(it));
+    }
+
+    if (e.key == 'ArrowDown') {
+      setState('selectedItem', (it) => getNextItemId(it));
+    }
+
+    
     if (e.key == "/") {
 
     }
@@ -83,76 +222,116 @@ function App() {
       prevState.pop()
       const prevItems = JSON.parse(prevState.pop())
 
-      console.log("PREV STATE", prevItems)
       setState('items', prevItems)
     }
   }
 
+  const getItemById = (id) => {
+    return state.items.find(it => it.id == id)
+  }
+
   const onKeyDown = (e) => {
+    console.log(e)
+    
     if (e.key === 'Tab') {
       e.preventDefault();
-
+      
       if (e.shiftKey) {
-        setState('items', state.lineNumber, 'depth', (it) => it - 1);
+        setState('items', it => it.id == state.selectedItem, 'depth', (it) => it - 1);
       } else {
-        setState('items', state.lineNumber, 'depth', (it) => it + 1);
+        setState('items', it => it.id == state.selectedItem, 'depth', (it) => it + 1);
       }
     }
 
+    if(e.key == 'ArrowLeft' && e.metaKey) {
+      setState('items', it => it.id == state.selectedItem, 'expanded', it => false)
+    }
+
+    if(e.key == 'ArrowRight' && e.metaKey) {
+      setState('items', it => it.id == state.selectedItem, 'expanded', it => true)
+    }
+    
+
     if (e.key == 'Enter') {
       if (e.metaKey) {
-        // setState('openedItem', state.lineNumber);
+        // setState('openedItem', state.selectedItem);
         return;
       }
       if (e.altKey) {
-        setState('items', state.lineNumber, 'done', (it) => !it);
+        setState('items', it => it.id == state.selectedItem, 'done', (it) => !it);
+        
+        if(getItemById(state.selectedItem).done == true) {
+          setState('items', it => it.id == state.selectedItem, 'doneAt', new Date());
+        }
+        
         e.preventDefault();
         return;
       }
       let depth;
       if (e.shiftKey) {
-        depth = state.items[state.lineNumber].depth + 1;
+        depth = currentItem().depth + 1;
       } else {
-        depth = state.items[state.lineNumber].depth;
+        depth = currentItem().depth;
       }
       const newItems = state.items.slice(0);
-      newItems.splice(state.lineNumber + 1, 0, Item('', depth));
+      newItems.splice(getItemIdx(getNextItemId(state.selectedItem)), 0, Item('', depth));
       setState('items', newItems);
-      setState('lineNumber', (it) => it + 1);
+      setState('selectedItem', getNextItemId);
     }
 
     if (e.key == 'Backspace') {
-      if (state.items[state.lineNumber].title === '') {
+      if (currentItem().title === '') {
         const newItems = state.items.slice(0);
-        newItems.splice(state.lineNumber, 1);
-        setState('lineNumber', (it) => it - 1);
+        newItems.splice(getItemIdx(state.selectedItem), 1);
+        setState('selectedItem', it => getPrevItemId(it));
         setState('items', newItems);
         e.preventDefault();
       }
     }
-
-    if (e.key == 'ArrowUp') {
-      setState('lineNumber', (it) => mod(it - 1, state.items.length));
-    }
-
-    if (e.key == 'ArrowDown') {
-      setState('lineNumber', (it) => mod(it + 1, state.items.length));
-    }
   };
 
+  const getItemIdx = (id) => {
+    return state.items.findIndex(it => it.id == id)
+  }
+  
+  const getPrevItemId = (id) => {
+    const curIdx = getItemIdx(id)
+    const curItem = getItemById(id)
+    const prevItem = state.items.findLast((it, idx) => idx < curIdx && it.depth <= curItem.depth)
+    
+    if(!prevItem.expanded) {
+      return prevItem.id
+    } else {
+      return state.items[mod(curIdx - 1, state.items.length)].id
+    }
+  }
+
+  const getNextItemId = (id) => {
+    const curIdx = getItemIdx(id)
+    const curItem = getItemById(id)
+
+    if(!curItem.expanded) {
+      return state.items.find((it, idx) => idx > curIdx && it.depth <= curItem.depth).id
+    } else {
+      return state.items[mod(curIdx + 1, state.items.length)].id
+    }
+  }
+
   const setTitle = (id, title) => {
-    console.log(id, title);
-    setState('items', id, 'title', title);
+    const idx = getItemIdx(id)
+    
+    setState('items', idx, 'title', title);
   };
 
   const currentItem = () => {
-    return state.items[state.lineNumber];
+    return getItemById(state.selectedItem);
   };
 
   const setData = (id, dataRaw) => {
     const data = JSON.parse(dataRaw);
-
-    setState('items', id, (it) => ({ ...it, ...data }));
+    const idx = getItemIdx(id)
+    
+    setState('items', idx, (it) => ({ ...it, ...data }));
   };
 
   const cropString = (str: string, limit: number) => {
@@ -167,11 +346,11 @@ function App() {
     const clipboardData = e.clipboardData || window.clipboardData;
     const pastedData = clipboardData.getData('Text');
 
-    const depth = state.items[state.lineNumber].depth;
+    const depth = currentItem().depth;
 
     const items = state.items.slice(0);
     const newItems = pastedData.split('\n').map(it => it.trim()).map(it => Item(it, depth))
-    items.splice(state.lineNumber, 1, ...newItems);
+    items.splice(getItemIdx(state.selectedItem), 1, ...newItems);
     setState('items', items);
   }
 
@@ -214,48 +393,13 @@ function App() {
   }
 
   document.body.addEventListener('keydown', globalOnKeyDown);
-
+  
   return (
     <main class="main">
       <div class="list" onKeyDown={onKeyDown}>
-        <For each={state.items}>
+        <For each={calcChildren(state.items)}>
           {(item, idx) => (
-            <div class="item">
-              <span>{'  '.repeat(item.depth)}</span>
-              <span>
-                <input
-                  class="checkbox"
-                  type="checkbox"
-                  checked={item.done}
-                  onChange={(e) =>
-                    setState('items', idx(), 'done', e.currentTarget.checked)
-                  }
-                />
-              </span>
-
-              <Show
-                when={state.lineNumber == idx()}
-                fallback={
-                  <span onClick={(e) => setState('lineNumber', idx)}>
-                    {cropString(item.title, 50)}
-                    <Show
-                      when={item.link}
-                    >
-                      <a class="inline-link" href={item.link} target="_blank">↗️</a>
-                    </Show>
-                  </span>
-                }
-              >
-                <input
-                  ref={inputRef}
-                  class="title-input"
-                  onInput={(e) => setTitle(idx(), e.target.value)}
-                  onPaste={handlePaste}
-                  onClick={(e) => setState('lineNumber', idx)}
-                  value={item.title}
-                />
-              </Show>
-            </div>
+            <TreeNode item={item} idx={idx} context={{ state, setState, setTitle, handlePaste, cropString }}></TreeNode>
           )}
         </For>
       </div>
@@ -280,6 +424,10 @@ function App() {
                 </a>
               </Show>
 
+              <Show when={currentItem().doneAt}>
+                <span>Done at {new Date(currentItem().doneAt).toLocaleString()}</span>
+              </Show>
+
 
 
               <Show when={currentItem().description}>
@@ -291,21 +439,21 @@ function App() {
               </For>
 
               <div>
-                <button onClick={(e) => setMode('edit')}>Edit</button>
+                <button onClick={(e) => setMode('edit')}>✏️</button>
               </div>
             </div>
           </Show>
 
           <Show when={mode() === 'edit'}>
             <div class="edit">
-              <button onClick={(e) => setMode('view')}>View</button>
+              <button onClick={(e) => setMode('view')}>👀</button>
 
               <div>
                 <textarea
                   cols="60"
                   rows="30"
                   value={JSON.stringify(currentItem(), null, 1)}
-                  onChange={(e) => setData(state.lineNumber, e.target.value)}
+                  onChange={(e) => setData(state.selectedItem, e.target.value)}
                 >
                   {JSON.stringify(currentItem(), null, 1)}
                 </textarea>

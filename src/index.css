@@ -123,3 +123,10 @@ a, a:visited {
 .inline-link:hover {
     opacity: 1;
   }
+
+button {
+  background: #2B3245;
+  border: 0;
+  padding: 4px 6px;
+  border-radius: 2px;
+}
