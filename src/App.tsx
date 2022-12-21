@@ -71,6 +71,12 @@ function migration(item) {
   return {...Item("", 0), ...item}
 }
 
+function fetchMetatags(url: string) {
+  return fetch(`https://cors.deno.dev/https://metatags-fetcher.deno.dev/?${url}`).then(r => r.json())
+}
+
+const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g
+
 function calcChildren(list) {
   // let result = [Item("root", -1)]
   // let curDepth = 0;
@@ -99,7 +105,6 @@ function calcChildren(list) {
 
   })
 
-  console.log(result)
   return result
 }
 
@@ -176,6 +181,7 @@ function TreeNode({item, context}) {
 
 function App() {
   let inputRef;
+  let bodyRef = document.body;
   let commandInputRef;
   const prevState = [];
 
@@ -189,7 +195,17 @@ function App() {
     items: [initItem],
     log: [],
     selectedItem: initItem.id,
+    theme: 'dark'
   });
+
+  const toggleTheme = () => {
+    setState("theme" , it => it === 'dark' ? 'light' : 'dark')
+  }
+
+  createEffect(() => {
+    bodyRef.dataset.theme = state.theme
+  })
+  
 
   state.items.forEach((it,idx) => {
     setState("items", idx, migration(it))
@@ -231,8 +247,6 @@ function App() {
   }
 
   const onKeyDown = (e) => {
-    console.log(e)
-    
     if (e.key === 'Tab') {
       e.preventDefault();
       
@@ -347,8 +361,26 @@ function App() {
     const pastedData = clipboardData.getData('Text');
 
     const depth = currentItem().depth;
-
+    
     const items = state.items.slice(0);
+    
+    if(pastedData.match(urlRegex)) {
+      fetchMetatags(pastedData).then(r => {
+        const title = r['title'] || r['twitter:title'] || r['og:title']
+        const description = r['description'] || r['twitter:description'] || r['og:description']
+        
+        const newItem = Item(title, depth)
+        newItem.description = description
+        newItem.link = pastedData
+        
+        items.splice(getItemIdx(state.selectedItem), 1, newItem);
+        setState('items', items);
+      })
+      
+      return;
+    }
+    
+    
     const newItems = pastedData.split('\n').map(it => it.trim()).map(it => Item(it, depth))
     items.splice(getItemIdx(state.selectedItem), 1, ...newItems);
     setState('items', items);
@@ -382,9 +414,10 @@ function App() {
     const commands = {
       smile: () => log(":)"),
       clear: () => log(""),
-      exec: (...args) => log(eval(args.join(" ")))
+      exec: (...args) => log(eval(args.join(" "))),
+      toggleTheme: toggleTheme
     }
-    console.log(commands[cmd], { commands, cmd, args })
+
     if (commands[cmd]) {
       commands[cmd](...args)
     } else {
@@ -392,7 +425,7 @@ function App() {
     }
   }
 
-  document.body.addEventListener('keydown', globalOnKeyDown);
+  bodyRef.addEventListener('keydown', globalOnKeyDown);
   
   return (
     <main class="main">
@@ -464,7 +497,7 @@ function App() {
       </Show>
 
       <div class="command">
-        <input ref={commandInputRef} onChange={e => execCommand(e.target.value)} />
+        <input ref={commandInputRef} onKeyUp={e => e.key == "Enter" ? execCommand(e.target.value) : null} />
       </div>
     </main>
   );

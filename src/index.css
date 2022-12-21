@@ -6,13 +6,37 @@ body {
   font-family: "Courier New";
 /*   -webkit-font-smoothing: antialiased; */
 /*   -moz-osx-font-smoothing: grayscale; */
-  background: #12151c;
-  color: #eee;
+  background: var(--main-bg-color);
+  color: var(--main-text-color);
   margin: 0;
 }
 
+:root {
+  --main-bg-color: #12151c;
+  --secondary-bg-color: #2b3245;
+  --main-text-color: #eee;
+  --primary: #2b3245;
+  --input-bg-color: #2b3245;
+}
+
+body[data-theme='light'] {
+  --main-bg-color: #f0f0f0;
+  --secondary-bg-color: #ffffff;
+  --main-text-color: #333333;
+  --primary: #c8c8c8;
+  --input-bg-color: #ffffff;
+}
+
+body[data-theme='dark'] {
+  --main-bg-color: #12151c;
+  --secondary-bg-color: #2b3245;
+  --main-text-color: #eee;
+  --primary: #2b3245;
+  --input-bg-color: #2b3245;
+}
+
 .active {
-  background: #2B3245;
+  background: var(--secondary-bg-color);
 }
 
 .checkbox {
@@ -64,8 +88,8 @@ code {
 }
 
 .command>input{
-  background: #12151c;
-  color: white;
+  background: var(--main-bg-color);
+  color: var(--main-text-color);
   border: 0;
   outline: 0;
   width: 100%;
@@ -78,7 +102,7 @@ input {
 
 .caret {
   letter-spacing: 0;
-  border-right: 1px solid white;
+  border-right: 1px solid var(--main-text-color);
 }
 
 
@@ -93,14 +117,14 @@ input {
   padding: 0;
   border: 0;
   width: 400px;
-  background: #2B3245;
-  color: white;
+  background: var(--input-bg-color);
+  color: var(--main-text-color);
   outline: 0;
 }
 
 textarea {
-  background: #2B3245;
-  color: white;
+  background: var(--input-bg-color);
+  color: var(--main-text-color);
   border: 0;
   outline: 0;
 }
@@ -110,7 +134,7 @@ textarea {
 }
 
 a, a:visited {
-  color: white;
+  color: var(--main-text-color);
 }
 
 .inline-link {
@@ -125,7 +149,7 @@ a, a:visited {
   }
 
 button {
-  background: #2B3245;
+  background: var(--primary);
   border: 0;
   padding: 4px 6px;
   border-radius: 2px;
