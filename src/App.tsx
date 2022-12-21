@@ -84,6 +84,10 @@ const deepCopy = (obj) => {
   return JSON.parse(JSON.stringify(obj));
 };
 
+function Spc() {
+  return <>&nbsp;</>
+}
+
 function calcChildren(list) {
   // let result = [Item("root", -1)]
   // let curDepth = 0;
@@ -122,6 +126,10 @@ function TreeNode({ item, context }) {
   createEffect(() => {
     if (state.selectedItem == item.id) {
       inputRef.focus();
+      
+      setTimeout(() => {
+        inputRef.selectionStart = inputRef.selectionEnd = item.title.length;
+      }, 10)
     }
   });
 
@@ -131,7 +139,7 @@ function TreeNode({ item, context }) {
         <span>{'  '.repeat(item.depth)}</span>
         <Show
           when={item.children.length}
-          fallback={' '}
+          fallback={<Spc/>}
         >
           <span>
             <Show
@@ -413,7 +421,7 @@ function App() {
         return;
       }
       let depth;
-      if (e.shiftKey || currentItem().expanded) {
+      if (e.shiftKey) {
         depth = currentItem().depth + 1;
       } else {
         depth = currentItem().depth;
