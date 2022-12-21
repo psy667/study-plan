@@ -79,6 +79,18 @@ code {
   overflow: scroll;
 }
 
+.markdown {
+  line-height: 1.4;
+/*   font-family: sans-serif; */
+}
+
+.markdown code {
+  background: var(--secondary-bg-color);
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
 .command {
   grid-column-start: 1;
   grid-column-end: 3;
