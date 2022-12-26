@@ -231,4 +231,8 @@ export class Controller {
         this.stateManager.setState('session', r.data.session)
         this.stateManager.setState('user', r.data.user)
     }
+
+    setContent(id: string, data: string) {
+        this.stateManager.setState('items', it => it.id == id, 'content', data)
+    }
 }

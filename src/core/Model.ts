@@ -9,6 +9,7 @@ export type Item = {
     tags: string[];
     description: string;
     doneAt: Date | null;
+    content: string;
 
     ///
 
@@ -29,6 +30,7 @@ export function Item(title, depth): Item {
         tags: [],
         description: '',
         doneAt: null,
+        content: '',
 
         ///
         expanded: true,

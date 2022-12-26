@@ -1,5 +1,6 @@
 import {createSignal, For, Show} from "solid-js";
 import {cropString} from "../utils";
+import {MarkdownViewer} from "./MarkdownViewer";
 
 export function Sidebar({currentItem, consoleOutput, controller}) {
     const [mode, setMode] = createSignal('view');
@@ -41,6 +42,12 @@ export function Sidebar({currentItem, consoleOutput, controller}) {
                     <div>
                         <button onClick={(e) => setMode('edit')}>✏️</button>
                     </div>
+
+                    <MarkdownViewer>
+                        <>
+                            { currentItem().content || "" }
+                        </>
+                    </MarkdownViewer>
                 </div>
             </Show>
 
@@ -56,6 +63,14 @@ export function Sidebar({currentItem, consoleOutput, controller}) {
                 >
                   {JSON.stringify(currentItem(), null, 1)}
                 </textarea>
+                    <textarea
+                        cols='60'
+                        rows='60'
+                        value={currentItem().content}
+                        onChange={(e) => controller.setContent(currentItem().id, e.target.value)}
+                    >
+                        {currentItem().content}
+                    </textarea>
                     </div>
                 </div>
             </Show>
