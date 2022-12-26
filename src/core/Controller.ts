@@ -2,12 +2,15 @@ import {StateManager} from "./StateManager";
 import {fetchMetatags} from "../service/fetchMetatags";
 import {deepCopy, last, urlRegex} from "../utils";
 import {Item} from "./Model";
+import {AuthResponse} from "@supabase/supabase-js";
 
 export class Controller {
     stateManager = new StateManager()
 
     constructor() {
     }
+
+
 
     selectItem(id) {
         this.stateManager.setState('selectedItem', id)
@@ -19,6 +22,14 @@ export class Controller {
 
     selectNextItem() {
         this.stateManager.setState('selectedItem', (it) => this.stateManager.getNextItemId(it));
+    }
+
+    saveData() {
+        return this.stateManager.saveDataToDatabase()
+    }
+
+    fetchData() {
+        return this.stateManager.fetchDataFromDatabase()
     }
 
     moveNodeUp() {
@@ -214,5 +225,10 @@ export class Controller {
 
         this.stateManager.setState('items', items);
         this.stateManager.setState('selectedItem', curItem.id);
+    }
+
+    setUser(r: AuthResponse) {
+        this.stateManager.setState('session', r.data.session)
+        this.stateManager.setState('user', r.data.user)
     }
 }

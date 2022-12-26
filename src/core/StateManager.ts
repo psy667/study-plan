@@ -1,7 +1,7 @@
 import {createLocalStore, findLast, mod} from "../utils";
 import {createEffect} from "solid-js";
 import {Item} from "./Model";
-
+import {supabase} from "../service/database";
 export class StateManager {
     initItem = Item('Type :help to get info', 0);
     prevState = [];
@@ -11,6 +11,8 @@ export class StateManager {
         log: [],
         selectedItem: this.initItem.id,
         theme: 'dark',
+        session: null,
+        user: null
     }
 
     state = this.initState
@@ -23,6 +25,45 @@ export class StateManager {
         createEffect(() => {
             this.prevState.push(JSON.stringify(this.state.items));
         });
+
+        // this.fetchDataFromDatabase().then(r => {
+        //     console.log(r)
+        //     if(r) {
+        //         this.setState('items', r)
+        //
+        //     }
+        // })
+    }
+
+    async fetchDataFromDatabase() {
+        if(!this.state.user) {
+            console.log("User is not authenticated")
+            return;
+        }
+        const { data } = await supabase
+            .from('user_items')
+            .select()
+            .eq('user_id', this.state.user.id)
+
+        console.log("Fetched data:", {data})
+        this.setState('items', data[0].items)
+
+        // return data[0].items
+    }
+
+    async saveDataToDatabase() {
+        const items =  this.state.items;
+
+        if(!this.state.user) {
+            console.log("User is not authenticated")
+            return;
+        }
+        const { data } = await supabase
+            .from('user_items')
+            .upsert({ user_id: this.state.user.id, items})
+            .select()
+
+        console.log("Saved data:", {data})
     }
 
 

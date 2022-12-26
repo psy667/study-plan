@@ -3,11 +3,13 @@ import {
     Show,
     For, createEffect,
 } from 'solid-js';
-import {cropString} from '../utils';
 import {TreeNode} from "./TreeNode";
 import {Controller} from "../core/Controller";
 import {MarkdownViewer} from "./MarkdownViewer";
 import {Sidebar} from "./Sidebar";
+
+import {supabase} from "../service/database";
+
 
 
 // function migration(item) {
@@ -35,6 +37,10 @@ const help = `
 \`:toggle\` Theme Toggle theme  
 \`:echo <text>\` Show <text>  
 \`:exec <expr>\` Execute JS expression and print result  
+\`:signup \<email\> \<password\>\` Sign up  
+\`:signin \<email\> \<password\>\` Sign in  
+\`:save\` Save data to external storage  
+\`:load\` Load data from external storage  
 `;
 
 
@@ -178,6 +184,47 @@ function App() {
             toggleTheme: () => controller.toggleTheme(),
             dump: () => log(localStorage.getItem('state')),
             help: () => log(help),
+            signup: (...args) => {
+                const [email, password] = args;
+                if(!email || !password) {
+                    console.log({args})
+                    log("Input email and password")
+                    return;
+                }
+                supabase.auth.signUp({
+                    email,
+                    password
+                }).then(r => {
+                    console.log(r)
+                    log("Confirm your email")
+                });
+            },
+            signin: (...args) => {
+                const [email, password] = args;
+                if(!email || !password) {
+                    console.log({args})
+                    log("Input email and password")
+                    return;
+                }
+                supabase.auth.signInWithPassword({
+                    email,
+                    password
+                }).then(r => {
+                    console.log(r)
+                    controller.setUser(r)
+                    log(`Logged in as ${r.data.user.email}`)
+                });
+            },
+            whoami: () => {
+                log(`\`\`\`json\n${JSON.stringify(controller.stateManager.state.user, null, 2)}\`\`\``)
+            },
+            save: () => {
+                controller.saveData().then(r => log("Data saved"))
+            },
+            load: () => {
+                log('Loading...')
+                controller.fetchData().then(r => log("Data fetched"))
+            }
         };
 
         if (commands[cmd]) {
