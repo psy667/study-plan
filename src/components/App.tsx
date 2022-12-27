@@ -66,6 +66,16 @@ function App() {
     const [consoleOutput, setConsoleOutput] = createSignal('');
 
     const globalOnKeyDown = (e) => {
+        if(e.key == 'e' && e.metaKey) {
+            controller.toggleSidebarMode()
+            return;
+        }
+
+        if(controller.stateManager.sidebarMode() === 'edit') {
+            if(e.key === 'Tab') e.preventDefault()
+            return;
+        }
+
         if (e.key == 'ArrowUp' && !e.metaKey) {
             controller.selectPrevItem()
         }
@@ -96,6 +106,10 @@ function App() {
     };
 
     const onKeyDown = (e: any) => {
+        if(controller.stateManager.sidebarMode() === 'edit') {
+            return;
+        }
+
         if (e.key === 'Tab') {
             e.preventDefault();
 
@@ -142,7 +156,8 @@ function App() {
         const pastedData = clipboardData.getData('Text');
 
         const lines = pastedData.split('\n')
-        if (lines.length) {
+        console.log("handle paste", {pastedData})
+        if (lines.length > 1) {
             controller.bulkInsert(lines)
         } else {
             controller.loadInfo(pastedData)

@@ -7,11 +7,11 @@ export function TreeNode({item, controller, handlePaste}) {
 
     createEffect(() => {
         if (controller.stateManager.state.selectedItem == item.id) {
-            inputRef.focus();
+            // inputRef.focus();
 
-            setTimeout(() => {
-                inputRef.selectionStart = inputRef.selectionEnd = item.title.length;
-            }, 10)
+            // setTimeout(() => {
+            //     inputRef.selectionStart = inputRef.selectionEnd = item.title.length;
+            // }, 10)
         }
     });
 

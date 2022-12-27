@@ -1,5 +1,5 @@
 import {createLocalStore, findLast, mod} from "../utils";
-import {createEffect} from "solid-js";
+import {createEffect, createSignal} from "solid-js";
 import {Item} from "./Model";
 import {supabase} from "../service/database";
 export class StateManager {
@@ -16,11 +16,14 @@ export class StateManager {
     }
 
     state = this.initState
-
     setState
+
+    sidebarMode: () => "view" | "edit" = () => "view"
+    setSidebarMode: (value: "view" | "edit") => null
 
     constructor() {
         [this.state, this.setState] = createLocalStore('state', this.initState);
+        [this.sidebarMode, this.setSidebarMode] = createSignal('view');
 
         createEffect(() => {
             this.prevState.push(JSON.stringify(this.state.items));

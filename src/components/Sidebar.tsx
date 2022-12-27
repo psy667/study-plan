@@ -1,9 +1,17 @@
-import {createSignal, For, Show} from "solid-js";
+import {createEffect, For, Show} from "solid-js";
 import {cropString} from "../utils";
 import {MarkdownViewer} from "./MarkdownViewer";
 
 export function Sidebar({currentItem, consoleOutput, controller}) {
-    const [mode, setMode] = createSignal('view');
+    const mode = controller.stateManager.sidebarMode;
+    let contentInputRef;
+
+    createEffect(() => {
+        if(mode() == 'edit') {
+            contentInputRef.focus()
+            contentInputRef.selectionStart = currentItem().content?.length;
+        }
+    })
 
     return (<Show when={currentItem() && consoleOutput() == ''}>
         <div class='sidebar'>
@@ -26,9 +34,9 @@ export function Sidebar({currentItem, consoleOutput, controller}) {
                     </Show>
 
                     <Show when={currentItem().doneAt}>
-                <span>
-                  Done at {new Date(currentItem().doneAt).toLocaleString()}
-                </span>
+                        <div>
+                            ✅ Done at {new Date(currentItem().doneAt).toLocaleString()}
+                        </div>
                     </Show>
 
                     <Show when={currentItem().description}>
@@ -40,7 +48,7 @@ export function Sidebar({currentItem, consoleOutput, controller}) {
                     </For>
 
                     <div>
-                        <button onClick={(e) => setMode('edit')}>✏️</button>
+                        <button onClick={(e) => controller.toggleSidebarMode()}>✏️</button>
                     </div>
 
                     <MarkdownViewer>
@@ -53,19 +61,20 @@ export function Sidebar({currentItem, consoleOutput, controller}) {
 
             <Show when={mode() === 'edit'}>
                 <div class='edit'>
-                    <button onClick={(e) => setMode('view')}>👀</button>
+                    <button onClick={(e) => controller.toggleSidebarMode()}>👀</button>
                     <div>
                 <textarea
-                    cols='60'
-                    rows='30'
+                    cols='80'
+                    rows='10'
                     value={JSON.stringify(currentItem(), null, 1)}
                     onChange={(e) => controller.setNodeData(currentItem().id, e.target.value)}
                 >
                   {JSON.stringify(currentItem(), null, 1)}
                 </textarea>
                     <textarea
-                        cols='60'
-                        rows='60'
+                        ref={contentInputRef}
+                        cols='80'
+                        rows='28'
                         value={currentItem().content}
                         onChange={(e) => controller.setContent(currentItem().id, e.target.value)}
                     >

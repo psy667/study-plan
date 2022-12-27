@@ -10,6 +10,9 @@ export class Controller {
     constructor() {
     }
 
+    toggleSidebarMode() {
+        this.stateManager.setSidebarMode(this.stateManager.sidebarMode() == 'view' ? 'edit' : 'view')
+    }
 
 
     selectItem(id) {
@@ -140,6 +143,8 @@ export class Controller {
         const curItem = this.getCurrentItem()
 
         if (link.match(urlRegex)) {
+            this.stateManager.setState('items', this.stateManager.getItemIdx(curItem.id), {...curItem, title: "Loading..."});
+
             fetchMetatags(link).then((r) => {
                 const pasredTitle =
                     r['title'] || r['twitter:title'] || r['og:title'] || link;

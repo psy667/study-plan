@@ -1,3 +1,4 @@
+import remarkGfm from "remark-gfm";
 import {createEffect, createSignal, Show} from "solid-js";
 import SolidMarkdown from "solid-markdown";
 
@@ -15,10 +16,10 @@ export function MarkdownViewer(props) {
     });
 
     return (
-        <>
+        <div class="markdown">
             <Show when={visible()}>
-                <SolidMarkdown children={children()}/>
+                <SolidMarkdown children={children()} remarkPlugins={[remarkGfm]}/>
             </Show>
-        </>
+        </div>
     );
 }
