@@ -1,0 +1,19 @@
+{
+    "name": "Study Planner",
+    "short_name": "Study Planner",
+    "icons": [
+        {
+            "src": "/android-chrome-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        }
+    ],
+    "name": "Study Plan",
+    "short_name": "Study Plan",
+    "theme_color": "#2196f3",
+    "background_color": "#fff",
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/",
+    "start_url": "/",
+}

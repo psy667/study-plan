@@ -1,17 +1,19 @@
 import {createEffect, For, Show} from "solid-js";
 import {Spc} from "./Spc";
 import {cropString} from "../utils";
+import {Controller} from "../core/Controller";
+import {Item} from "../core/Model";
 
-export function TreeNode({item, controller, handlePaste}) {
+export function TreeNode({item, controller, handlePaste}: {item: Item, controller: Controller, handlePaste: () => null}) {
     let inputRef;
 
     createEffect(() => {
         if (controller.stateManager.state.selectedItem == item.id) {
-            // inputRef.focus();
+            inputRef.focus();
 
-            // setTimeout(() => {
-            //     inputRef.selectionStart = inputRef.selectionEnd = item.title.length;
-            // }, 10)
+            setTimeout(() => {
+                inputRef.selectionStart = inputRef.selectionEnd = item.title.length;
+            }, 10)
         }
     });
 
@@ -61,7 +63,7 @@ export function TreeNode({item, controller, handlePaste}) {
                     <input
                         ref={inputRef}
                         class='title-input'
-                        onInput={(e) => controller.setTitle(item.id, e.target.value)}
+                        onChange={(e) => controller.setTitle(item.id, e.target.value)}
                         onPaste={handlePaste}
                         onClick={(e) => controller.selectItem(item.id)}
                         value={item.title}
