@@ -9,11 +9,6 @@ export default defineConfig({
     "short_name": "Study Planner",
     "icons": [
       {
-        "src": "./android-chrome-144x144.png",
-        "sizes": "144x144",
-        "type": "image/png"
-      },
-      {
         "src": "./icon-72x72.png",
         "sizes": "72x72",
         "type": "image/png"
