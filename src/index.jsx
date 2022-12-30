@@ -5,10 +5,11 @@ import './index.css';
 import App from './components/App';
 
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-        .register('/serviceworker.js')
-        .then(() => { console.log('Service Worker Registered'); });
+import { registerSW } from "virtual:pwa-register";
+
+if ("serviceWorker" in navigator) {
+    // && !/localhost/.test(window.location)) {
+    registerSW();
 }
 
 render(() => <App />, document.getElementById('root'));
