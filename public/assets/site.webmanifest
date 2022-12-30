@@ -1,6 +1,7 @@
 {
     "name": "Study Planner",
     "short_name": "Study Planner",
+    "id": "/",
     "icons": [
         {
             "src": "./android-chrome-144x144.png",
