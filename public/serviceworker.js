@@ -20,7 +20,7 @@ const isLocalhost = Boolean(
     )
 );
 
-export function register(config) {
+function register(config) {
     if ("serviceWorker" in navigator) {
         // The URL constructor is available in all browsers that support SW.
         const publicUrl = new URL(window.location.href);
@@ -127,10 +127,12 @@ function checkValidServiceWorker(swUrl, config) {
         });
 }
 
-export function unregister() {
+function unregister() {
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.ready.then(registration => {
             registration.unregister();
         });
     }
 }
+
+register()
